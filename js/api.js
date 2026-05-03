@@ -2,8 +2,8 @@
 // ГЛАВНЫЕ НАСТРОЙКИ — МЕНЯЙ ТОЛЬКО ЭТИ ДВЕ СТРОКИ
 // =============================================
 
-const API_URL = 'https://script.google.com/macros/s/СЮДА_ВСТАВЬ_СВОЙ_URL/exec';
-const SECRET_KEY = 'ключ12345';
+const API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTX97ex-yPFXr8oeHMiaoKekTX5qRIhew8WwSbT4sh3ByDSY1NWshLf-AmdFtKmXpnxlmey-MHGRtzerQus2Ol_Sx4jdn029uHSoTRl1ZA9cfgpaLn7_KPaPGgrvBEwdn-qC9VIZ0ysSepuZCW7uc8HXfjCs67UV4wcFfK7rCGChFY0-4QF6TRlyo4WNvL2-He62n-_0QzfAhnm_EOjprYtN-yqpe7mS2w979rS34REMSYoyqv3LWrVg4VvRFOzYKwzbpoq-fYF96FqKgFoTaHNytdFcw&lib=MiZHaH3dnrTipwqMfWeivc_b40ZRUnSGk';
+const SECRET_KEY = 'admin';
 
 // =============================================
 // НЕ ТРОГАЙ КОД НИЖЕ

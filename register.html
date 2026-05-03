@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #f0f2f5;
+      margin: 0;
+    }
+    .box {
+      background: white;
+      padding: 35px;
+      border-radius: 12px;
+      width: 380px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    h2 { margin-bottom: 20px; color: #333; }
+    input {
+      width: 100%;
+      padding: 12px;
+      margin: 7px 0;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    input:focus { border-color: #2196F3; outline: none; }
+    button {
+      width: 100%;
+      padding: 13px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button:hover { background: #43A047; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
+    .msg {
+      padding: 10px 14px;
+      border-radius: 6px;
+      margin: 10px 0;
+      font-size: 14px;
+      display: none;
+    }
+    .msg.show { display: block; }
+    .error { background: #fde8e8; color: #c62828; border: 1px solid #ffcdd2; }
+    .success { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; }
+    .link { text-align: center; margin-top: 15px; font-size: 14px; color: #666; }
+    .link a { color: #2196F3; text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<div class="box">
+  <h2>📝 Регистрация</h2>
+
+  <input type="text" id="username" placeholder="Придумайте имя пользователя">
+  <input type="email" id="email" placeholder="Ваш email">
+  <input type="password" id="password" placeholder="Пароль (минимум 6 символов)">
+  <input type="password" id="confirm" placeholder="Повторите пароль">
+
+  <div class="msg" id="msg"></div>
+
+  <button id="btn" onclick="doRegister()">Зарегистрироваться</button>
+
+  <div class="link">
+    Уже есть аккаунт? <a href="login.html">Войти</a>
+  </div>
+</div>
+
+<!-- Подключаем api.js -->
+<script src="js/api.js"></script>
+
+<script>
+  // Если уже залогинен — отправляем в чат
+  if (getSession()) window.location.href = 'chat.html';
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = 'msg show ' + type;
+  }
+
+  async function doRegister() {
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+    const btn = document.getElementById('btn');
+
+    // Проверки на клиенте
+    if (!username) { showMsg('Введите имя пользователя', 'error'); return; }
+    if (username.length < 3) { showMsg('Имя минимум 3 символа', 'error'); return; }
+    if (!email) { showMsg('Введите email', 'error'); return; }
+    if (!email.includes('@')) { showMsg('Неверный формат email', 'error'); return; }
+    if (!password) { showMsg('Введите пароль', 'error'); return; }
+    if (password.length < 6) { showMsg('Пароль минимум 6 символов', 'error'); return; }
+    if (password !== confirm) { showMsg('Пароли не совпадают!', 'error'); return; }
+
+    // Блокируем кнопку
+    btn.disabled = true;
+    btn.textContent = '⏳ Регистрация...';
+
+    const result = await API.register(username, email, password);
+
+    if (result.success) {
+      // Сразу логиним
+      await API.login(email, password);
+      showMsg('✅ Успешно! Переходим в чат...', 'success');
+      setTimeout(() => window.location.href = 'chat.html', 1500);
+    } else {
+      showMsg('❌ ' + result.error, 'error');
+      btn.disabled = false;
+      btn.textContent = 'Зарегистрироваться';
+    }
+  }
+
+  // Enter для отправки
+  document.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') doRegister();
+  });
+</script>
+
+</body>
+</html>

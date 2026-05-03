@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Администратор</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; }
+    .header {
+      background: #333;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hbtn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .stat {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .stat-num { font-size: 38px; font-weight: bold; color: #2196F3; }
+    .stat-label { color: #666; font-size: 14px; margin-top: 5px; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 20px 30px; }
+    .tabs { display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap; }
+    .tab {
+      padding: 9px 20px;
+      background: white;
+      border: 2px solid #ddd;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .tab.active { background: #2196F3; color: white; border-color: #2196F3; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .section { display: none; }
+    .section.active { display: block; }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #f8f9fa;
+      padding: 10px 12px;
+      text-align: left;
+      font-size: 13px;
+      color: #555;
+      border-bottom: 2px solid #eee;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 13px;
+    }
+    tr:hover td { background: #fafafa; }
+    .badge {
+      padding: 3px 9px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    .online { background: #e8f5e9; color: #2e7d32; }
+    .offline { background: #fce4ec; color: #880e4f; }
+    .admin-badge { background: #e3f2fd; color: #1565c0; }
+    .search {
+      padding: 9px 14px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 280px;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    .export-btn {
+      float: right;
+      padding: 8px 18px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .view-btn {
+      padding: 5px 12px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      max-width: 700px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .close-btn {
+      padding: 9px 22px;
+      background: #666;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    .loading { text-align: center; color: #999; padding: 30px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <strong>⚙️ Панель администратора</strong>
+    <span style="font-size:13px; opacity:0.7; margin-left:10px" id="adminLabel"></span>
+  </div>
+  <div style="display:flex; gap:8px">
+    <button class="hbtn" onclick="loadAll()">🔄 Обновить</button>
+    <button class="hbtn" onclick="location.href='chat.html'">← Чат</button>
+  </div>
+</div>
+
+<!-- Статистика -->
+<div class="stats">
+  <div class="stat">
+    <div class="stat-num" id="sUsers">—</div>
+    <div class="stat-label">Пользователей</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="sOnline">—</div>
+    <div class="stat-label">Онлайн сейчас</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="sMessages">—</div>
+    <div class="stat-label">Сообщений</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num" id="sTables">—</div>
+    <div class="stat-label">Заполненных таблиц</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- Вкладки -->
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab('users', this)">👥 Пользователи</div>
+    <div class="tab" onclick="switchTab('messages', this)">💬 Сообщения</div>
+    <div class="tab" onclick="switchTab('tables', this)">📊 Таблицы</div>
+  </div>
+
+  <!-- Пользователи -->
+  <div class="section active card" id="sec-users">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
+      <input class="search" type="text" placeholder="🔍 Поиск..."
+             oninput="filterUsers(this.value)">
+      <button class="export-btn" onclick="exportCSV('users')">📥 Скачать CSV</button>
+    </div>
+    <div id="usersContent" class="loading">Загрузка...</div>
+  </div>
+
+  <!-- Сообщения -->
+  <div class="section card" id="sec-messages">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
+      <input class="search" type="text" placeholder="🔍 Поиск..."
+             oninput="filterMessages(this.value)">
+      <button class="export-btn" onclick="exportCSV('messages')">📥 Скачать CSV</button>
+    </div>
+    <div id="messagesContent" class="loading">Загрузка...</div>
+  </div>
+
+  <!-- Таблицы -->
+  <div class="section card" id="sec-tables">
+    <div style="text-align:right; margin-bottom:15px">
+      <button class="export-btn" onclick="exportCSV('tables')">📥 Скачать CSV</button>
+    </div>
+    <div id="tablesContent" class="loading">Загрузка...</div>
+  </div>
+
+</div>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <h3 id="modalTitle">Данные таблицы</h3>
+    <div id="modalBody" style="margin-top:15px"></div>
+    <button class="close-btn" onclick="closeModal()">Закрыть</button>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+
+<script>
+  const user = requireAuth();
+  if (!user || user.role !== 'admin') {
+    alert('Доступ только для администраторов!');
+    window.location.href = 'chat.html';
+    throw new Error('stop');
+  }
+
+  document.getElementById('adminLabel').textContent = user.username;
+
+  let data = { users: [], messages: [], tables: [] };
+
+  function fmt(ts) {
+    if (!ts) return '—';
+    return new Date(ts).toLocaleString('ru');
+  }
+
+  function safe(t) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(t || '')));
+    return d.innerHTML;
+  }
+
+  // Загрузка всех данных
+  async function loadAll() {
+    document.getElementById('usersContent').innerHTML = '<div class="loading">Загрузка...</div>';
+    document.getElementById('messagesContent').innerHTML = '<div class="loading">Загрузка...</div>';
+    document.getElementById('tablesContent').innerHTML = '<div class="loading">Загрузка...</div>';
+
+    const [usersRes, msgsRes, tablesRes] = await Promise.all([
+      API.getUsers(),
+      API.getMessages(200),
+      API.getTables()
+    ]);
+
+    if (usersRes.success) {
+      data.users = usersRes.users;
+      document.getElementById('sUsers').textContent = data.users.length;
+      document.getElementById('sOnline').textContent = data.users.filter(u => u.isOnline).length;
+      renderUsers(data.users);
+    }
+
+    if (msgsRes.success) {
+      data.messages = msgsRes.messages.reverse();
+      document.getElementById('sMessages').textContent = data.messages.length;
+      renderMessages(data.messages);
+    }
+
+    if (tablesRes.success) {
+      data.tables = tablesRes.tables;
+      document.getElementById('sTables').textContent = data.tables.length;
+      renderTables(data.tables);
+    }
+  }
+
+  function renderUsers(users) {
+    if (users.length === 0) {
+      document.getElementById('usersContent').innerHTML = '<div class="loading">Нет пользователей</div>';
+      return;
+    }
+    document.getElementById('usersContent').innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>Имя</th><th>Email</th><th>Статус</th>
+            <th>Роль</th><th>Регистрация</th><th>Последний вход</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${users.map(u => `
+            <tr>
+              <td><strong>${safe(u.username)}</strong></td>
+              <td>${safe(u.email)}</td>
+              <td>
+                <span class="badge ${u.isOnline ? 'online' : 'offline'}">
+                  ${u.isOnline ? '🟢 Онлайн' : '⚫ Офлайн'}
+                </span>
+              </td>
+              <td>
+                <span class="badge ${u.role === 'admin' ? 'admin-badge' : ''}">
+                  ${u.role || 'user'}
+                </span>
+              </td>
+              <td>${fmt(u.createdAt)}</td>
+              <td>${fmt(u.lastSeen)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderMessages(msgs) {
+    if (msgs.length === 0) {
+      document.getElementById('messagesContent').innerHTML = '<div class="loading">Нет сообщений</div>';
+      return;
+    }
+    document.getElementById('messagesContent').innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Пользователь</th><th>Сообщение</th><th>Время</th></tr>
+        </thead>
+        <tbody>
+          ${msgs.map(m => `
+            <tr>
+              <td><strong>${safe(m.username)}</strong><br>
+                  <span style="color:#999;font-size:11px">${safe(m.email)}</span></td>
+              <td>${safe(m.text)}</td>
+              <td style="white-space:nowrap">${fmt(m.timestamp)}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function renderTables(tables) {
+    if (tables.length === 0) {
+      document.getElementById('tablesContent').innerHTML = '<div class="loading">Нет данных</div>';
+      return;
+    }
+    document.getElementById('tablesContent').innerHTML = `
+      <table>
+        <thead>
+          <tr><th>Пользователь</th><th>Email</th><th>Строк</th><th>Дата</th><th>Статус</th><th>Просмотр</th></tr>
+        </thead>
+        <tbody>
+          ${tables.map((t, i) => `
+            <tr>
+              <td><strong>${safe(t.username)}</strong></td>
+              <td>${safe(t.email)}</td>
+              <td>${t.rowCount}</td>
+              <td>${fmt(t.submittedAt)}</td>
+              <td><span class="badge" style="background:#fff3cd;color:#856404">${t.status}</span></td>
+              <td><button class="view-btn" onclick="viewTable(${i})">👁 Открыть</button></td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // Просмотр таблицы
+  function viewTable(index) {
+    const t = data.tables[index];
+    document.getElementById('modalTitle').textContent =
+      `Таблица от ${t.username} · ${fmt(t.submittedAt)}`;
+    document.getElementById('modalBody').innerHTML = `
+      <p style="color:#666;margin-bottom:12px">Email: ${safe(t.email)}</p>
+      <table style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr style="background:#2196F3;color:white">
+            <th style="padding:8px">Наименование</th>
+            <th style="padding:8px">Кол-во</th>
+            <th style="padding:8px">Единица</th>
+            <th style="padding:8px">Примечание</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${t.tableData.map(row => `
+            <tr style="border-bottom:1px solid #eee">
+              <td style="padding:8px">${safe(row.name)}</td>
+              <td style="padding:8px">${row.quantity}</td>
+              <td style="padding:8px">${safe(row.unit)}</td>
+              <td style="padding:8px">${safe(row.note) || '—'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+    document.getElementById('modal').classList.add('show');
+  }
+
+  function closeModal() {
+    document.getElementById('modal').classList.remove('show');
+  }
+
+  // Закрытие по клику на фон
+  document.getElementById('modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Переключение вкладок
+  function switchTab(name, el) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('sec-' + name).classList.add('active');
+    el.classList.add('active');
+  }
+
+  // Фильтры
+  function filterUsers(q) {
+    q = q.toLowerCase();
+    const filtered = data.users.filter(u =>
+      (u.username || '').toLowerCase().includes(q) ||
+      (u.email || '').toLowerCase().includes(q)
+    );
+    renderUsers(filtered);
+  }
+
+  function filterMessages(q) {
+    q = q.toLowerCase();
+    const filtered = data.messages.filter(m =>
+      (m.text || '').toLowerCase().includes(q) ||
+      (m.username || '').toLowerCase().includes(q)
+    );
+    renderMessages(filtered);
+  }
+
+  // Экспорт CSV
+  function exportCSV(type) {
+    let rows = [];
+    let filename = '';
+
+    if (type === 'users') {
+      rows = [['Имя', 'Email', 'Роль', 'Статус', 'Регистрация', 'Последний вход']];
+      data.users.forEach(u => rows.push([u.username, u.email, u.role, u.isOnline ? 'Онлайн' : 'Офлайн', fmt(u.createdAt), fmt(u.lastSeen)]));
+      filename = 'users.csv';
+    } else if (type === 'messages') {
+      rows = [['Пользователь', 'Email', 'Сообщение', 'Время']];
+      data.messages.forEach(m => rows.push([m.username, m.email, m.text, fmt(m.timestamp)]));
+      filename = 'messages.csv';
+    } else if (type === 'tables') {
+      rows = [['Пользователь', 'Email', 'Строк', 'Дата', 'Статус']];
+      data.tables.forEach(t => rows.push([t.username, t.email, t.rowCount, fmt(t.submittedAt), t.status]));
+      filename = 'tables.csv';
+    }
+
+    const csv = '\ufeff' + rows.map(r =>
+      r.map(c => '"' + String(c).replace(/"/g, '""') + '"').join(',')
+    ).join('\n');
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = filename;
+    a.click();
+  }
+
+  // Загружаем при открытии
+  loadAll();
+</script>
+
+</body>
+</html>

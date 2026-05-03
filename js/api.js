@@ -2,7 +2,7 @@
 // ГЛАВНЫЕ НАСТРОЙКИ — МЕНЯЙ ТОЛЬКО ЭТИ ДВЕ СТРОКИ
 // =============================================
 
-const API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnTX97ex-yPFXr8oeHMiaoKekTX5qRIhew8WwSbT4sh3ByDSY1NWshLf-AmdFtKmXpnxlmey-MHGRtzerQus2Ol_Sx4jdn029uHSoTRl1ZA9cfgpaLn7_KPaPGgrvBEwdn-qC9VIZ0ysSepuZCW7uc8HXfjCs67UV4wcFfK7rCGChFY0-4QF6TRlyo4WNvL2-He62n-_0QzfAhnm_EOjprYtN-yqpe7mS2w979rS34REMSYoyqv3LWrVg4VvRFOzYKwzbpoq-fYF96FqKgFoTaHNytdFcw&lib=MiZHaH3dnrTipwqMfWeivc_b40ZRUnSGk';
+const API_URL = 'https://script.googleusercontent.com/macros/echo?user_content_key=AUkAhnT2iZ61WHk-d3QltpKdkdIRxiYjovkcD0AQ9BPfvtXFHpEG3rqGiQy4X71or4UiO487bZxbE1U-Ph-Wcc8_XfK2Btlg0LA2ogpWB0VWiByf2ga7rie5YDeGvSC4Ie3uxU1EQvZPg328ZYCe7ndqfJQqDlasEpe8gFJPiJmL6Q41JqDaMd__qvvyn5XSqEwufslPpte2gAuiNd5DKslL8kNlp5_0BUrQobxsBZCiUI8zPH1Z5fUKsrB8UAEND1gNrWfNiTncUVNwRLOYHjZzvJgTvncruQ&lib=MiZHaH3dnrTipwqMfWeivc_b40ZRUnSGk/exec';
 const SECRET_KEY = 'admin';
 
 // =============================================

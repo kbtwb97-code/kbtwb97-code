@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Заполнение таблицы</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; }
+    .header {
+      background: #2196F3;
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .hbtn {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.5);
+      color: white;
+      padding: 7px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .container { max-width: 900px; margin: 25px auto; padding: 0 20px; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 25px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      background: #2196F3;
+      color: white;
+      padding: 11px 10px;
+      text-align: left;
+      font-size: 14px;
+    }
+    td { padding: 8px 6px; border-bottom: 1px solid #eee; }
+    tr:hover td { background: #f9f9f9; }
+    input[type="text"], input[type="number"], select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    input:focus, select:focus { border-color: #2196F3; outline: none; }
+    .add-btn {
+      padding: 9px 20px;
+      background: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 12px;
+    }
+    .save-btn {
+      padding: 12px 35px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .save-btn:disabled { background: #aaa; }
+    .del-btn {
+      padding: 5px 10px;
+      background: #f44336;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .msg {
+      padding: 12px 16px;
+      border-radius: 6px;
+      margin: 12px 0;
+      display: none;
+      font-size: 14px;
+    }
+    .msg.show { display: block; }
+    .error { background: #fde8e8; color: #c62828; }
+    .success { background: #e8f5e9; color: #2e7d32; }
+    .row-num { color: #999; font-size: 13px; text-align: center; width: 40px; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <strong>📊 Заполнение таблицы</strong>
+    <span style="font-size:13px; opacity:0.8; margin-left:10px" id="userLabel"></span>
+  </div>
+  <button class="hbtn" onclick="location.href='chat.html'">← Назад в чат</button>
+</div>
+
+<div class="container">
+  <div class="card">
+    <h3 style="margin-bottom:15px">Введите данные</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width:45px">№</th>
+          <th>Наименование *</th>
+          <th style="width:110px">Количество</th>
+          <th style="width:100px">Единица</th>
+          <th>Примечание</th>
+          <th style="width:60px"></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- строки добавляются кодом -->
+      </tbody>
+    </table>
+
+    <button class="add-btn" onclick="addRow()">+ Добавить строку</button>
+
+    <div class="msg" id="msg"></div>
+
+    <div style="margin-top:20px; display:flex; gap:12px; align-items:center">
+      <button class="save-btn" id="saveBtn" onclick="saveData()">
+        💾 Сохранить данные
+      </button>
+      <span style="color:#999; font-size:13px">* Обязательное поле</span>
+    </div>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+
+<script>
+  const user = requireAuth();
+  if (!user) throw new Error('stop');
+
+  document.getElementById('userLabel').textContent = user.username;
+
+  let rowId = 0;
+
+  function addRow() {
+    rowId++;
+    const tbody = document.getElementById('tableBody');
+    const tr = document.createElement('tr');
+    tr.id = 'r' + rowId;
+    tr.innerHTML = `
+      <td class="row-num">${tbody.rows.length + 1}</td>
+      <td>
+        <input type="text" id="name_${rowId}" placeholder="Введите наименование">
+      </td>
+      <td>
+        <input type="number" id="qty_${rowId}" placeholder="0" min="0" step="0.01">
+      </td>
+      <td>
+        <select id="unit_${rowId}">
+          <option value="шт">шт</option>
+          <option value="кг">кг</option>
+          <option value="г">г</option>
+          <option value="л">л</option>
+          <option value="мл">мл</option>
+          <option value="м">м</option>
+          <option value="м²">м²</option>
+          <option value="м³">м³</option>
+          <option value="упак">упак</option>
+          <option value="компл">компл</option>
+        </select>
+      </td>
+      <td>
+        <input type="text" id="note_${rowId}" placeholder="Необязательно">
+      </td>
+      <td>
+        <button class="del-btn" onclick="delRow('r${rowId}')">✕</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+
+    // Фокус на новую строку
+    document.getElementById('name_' + rowId).focus();
+  }
+
+  function delRow(id) {
+    const row = document.getElementById(id);
+    if (row) {
+      row.remove();
+      // Обновляем номера строк
+      const rows = document.querySelectorAll('#tableBody tr');
+      rows.forEach((r, i) => {
+        r.querySelector('.row-num').textContent = i + 1;
+      });
+    }
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = 'msg show ' + type;
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  async function saveData() {
+    const rows = document.querySelectorAll('#tableBody tr');
+    const tableData = [];
+
+    rows.forEach(row => {
+      const rid = row.id.replace('r', '');
+      const name = document.getElementById('name_' + rid)?.value.trim();
+      const qty = document.getElementById('qty_' + rid)?.value;
+      const unit = document.getElementById('unit_' + rid)?.value;
+      const note = document.getElementById('note_' + rid)?.value.trim();
+
+      if (name) {
+        tableData.push({
+          name: name,
+          quantity: parseFloat(qty) || 0,
+          unit: unit,
+          note: note || ''
+        });
+      }
+    });
+
+    if (tableData.length === 0) {
+      showMsg('⚠️ Заполните хотя бы одну строку с наименованием!', 'error');
+      return;
+    }
+
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Сохранение...';
+
+    const result = await API.saveTable(tableData);
+
+    if (result.success) {
+      showMsg(`✅ Данные сохранены! ${tableData.length} строк записано.`, 'success');
+      btn.textContent = '✅ Сохранено!';
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = '💾 Сохранить данные';
+      }, 3000);
+    } else {
+      showMsg('❌ Ошибка: ' + result.error, 'error');
+      btn.disabled = false;
+      btn.textContent = '💾 Сохранить данные';
+    }
+  }
+
+  // Добавляем первую строку при загрузке
+  addRow();
+</script>
+
+</body>
+</html>
